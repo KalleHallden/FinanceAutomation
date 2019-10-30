@@ -2,3 +2,5 @@
 .vscode
 transactions.json
 statements.json
+/exports
+/__pycache__

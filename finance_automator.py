@@ -33,7 +33,7 @@ def getFloat(list_):
     amount = float(amount[0] + "." + amount[1])
     return amount
 
-with open('export2.csv') as csv_file:
+with open('exports/export.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
     for row in csv_reader:
