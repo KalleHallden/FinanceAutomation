@@ -10,7 +10,8 @@ def statement_from_json(json):
         json["ending_balance_total"],
         json["tax_to_pay"],
         json["withdrew"],
-        json["salary"]
+        json["salary"],
+        json["errors"]
     )
 
 
@@ -43,15 +44,16 @@ class Transaction:
 
 
 class Statement:
-    def __init__(self, date, buisiness_expenses, income, ending_balance_month, ending_balance_total, tax_to_pay, withdrew, salary):
+    def __init__(self, date, buisiness_expenses, income, ending_balance_month, ending_balance_total, tax_paid, withdrew, salary, errors):
         self.date = date
         self.buisiness_expenses = buisiness_expenses
         self.income = income
         self.ending_balance_month = ending_balance_month
         self.ending_balance_total = ending_balance_total
-        self.tax_to_pay = tax_to_pay
+        self.tax_paid = tax_paid
         self.withdrew = withdrew
         self.salary = salary
+        self.errors = errors
 
     def serialize(self):
         return {
@@ -60,9 +62,10 @@ class Statement:
             "income": self.income,
             "ending_balance_month": self.ending_balance_month,
             "ending_balance_total": self.ending_balance_total,
-            "tax_to_pay": self.tax_to_pay,
+            "tax_paid": self.tax_paid,
             "withdrew": self.withdrew,
-            "salary" : self.salary
+            "salary" : self.salary,
+            "errors" : self.errors
         }
     def set_ending_balance_month(self):
         self.ending_balance_month = self.income + self.withdrew
@@ -82,13 +85,14 @@ class Statement:
                 if name.lower() == "sk":
                     # salary kalle
                     self.salary = self.salary + transfer.amount
-                    self.tax_to_pay = self.tax_to_pay + \
-                        ((transfer.amount / 2) * 3)
                 elif name.lower() == "be":
                     # buisiness expense
                     self.buisiness_expenses = self.buisiness_expenses + transfer.amount
-                elif name.lower == "e":
+                elif name.lower() == "e":
+                    self.errors = self.errors + transfer.amount
                     transfer_amount = 0.0
+                elif name.lower() == "tx":
+                    self.tax_paid = self.tax_paid + transfer_amount
             if transfer_amount > 0.0:
                 self.income = self.income + transfer_amount
             else:

@@ -25,13 +25,16 @@ except:
 
 
 def getFloat(list_):
-    list_ = list_.split(".")
-    amount = ""
-    for num in list_:
-        amount = amount + num
-    amount = amount.split(",")
-    amount = float(amount[0] + "." + amount[1])
-    return amount
+    try:
+        list_ = list_.split(".")
+        amount = ""
+        for num in list_:
+            amount = amount + num
+        amount = amount.split(",")
+        amount = float(amount[0] + "." + amount[1])
+        return amount
+    except:
+        return 0.0
 
 with open('exports/export.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
@@ -71,7 +74,7 @@ with open('transactions.json', 'w') as json_file:
     data["Transactions"] = []
     for transfer in transactions: 
         date_day = datetime.datetime.strptime(transfer.date, "%Y-%m-%d").date().strftime("%Y%m")
-        statement = Statement(date_day, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        statement = Statement(date_day, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         data["Transactions"].append(transfer.serialize())
         exists = False
         for stat_ in states:
@@ -91,7 +94,13 @@ with open('transactions.json', 'w') as json_file:
 
     json.dump(data, json_file, sort_keys=True, indent=4)
 
-statements = states
+# statements = states
+
+statements = sorted(
+    states,
+    key=lambda x: datetime.datetime.strptime(x.date, '%Y%m').date(), reverse=True
+)
+        
 with open('statements.json', 'w') as json_file:
     data = {}
     data["Statements"] = []
@@ -99,7 +108,36 @@ with open('statements.json', 'w') as json_file:
         data["Statements"].append(stat_.serialize())
     json.dump(data, json_file, sort_keys=True, indent=4)
 
-print(json.dumps(statement.serialize(), indent=4, sort_keys=True))
+total_income = 0.0
+total_expenses = 0.0
+total_taxes = 0.0
+taxes_paid = 0.0
+salary_taken = 0.0
+total_withdrawls = 0.0
+
+for stat_ in statements:
+    total_income = total_income + stat_.income
+    total_expenses = total_expenses + stat_.buisiness_expenses 
+    salary_taken = salary_taken + stat_.salary
+    taxes_paid = taxes_paid + stat_.tax_paid
+    total_withdrawls = total_withdrawls + stat_.withdrew
+
+total_taxes = (salary_taken / 2) * 3 - taxes_paid
+# print(str(total_withdrawls) + " - " + str(taxes_paid) + " = " + str(total_withdrawls - taxes_paid)) 
+total_withdrawls = total_withdrawls - taxes_paid
+total_net_income = (total_income + total_expenses) + salary_taken + (total_taxes)
+potential_salary = (total_net_income + taxes_paid) * 0.4
+
+print("\n"*3)
+print("Total income: " + str(total_income))
+print("Total NET income: " + str(total_net_income))
+print("Total expenses: " + str(total_expenses))
+print("Total tax to pay: " + str(total_taxes))
+print("Potential salary: " + str(potential_salary))
+print("Salary taken: " + str(salary_taken))
+print("Total withdrawls: " + str(total_withdrawls))
+print("\n"*3)
+
 
 
     
